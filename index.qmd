@@ -1,7 +1,7 @@
 ---
-title: "Replace with a specific, informative title"
-subtitle: "Replace with one sentence that tells readers why the question matters"
-author: "Replace with all group members' names"
+title: "What factors of a used car most influence price?"
+subtitle: "Factors you should consider when buying a used car to achieve your best price."
+author: "Logan Curtis and Mason Zinn"
 date: last-modified
 description: "Replace with a brief description for link previews."
 ---
@@ -14,18 +14,48 @@ This template suggests one way to tell the story. You may rename, combine, or re
 
 ## The question
 
-**In one or two short paragraphs, introduce the setting, audience, focused research question, data source, observational unit, response, important predictors, and one important data limitation. Lead with what makes the question worth answering.**
+We want to look into what factors of a used car most impact it's price. The intended audience are those who are looking to buy a car but don't want to buy brand new. This answer matters because it can help people pick and choose what they want in a car and be able to tell how that will impact the price. The response variable is price measured in dollars and important predictors are year, manufacturer, condition, cylinders, fuel, miles, title status, transmission, drive, type, state, and paint color. 
+
+Our observational unit is the asking price in dollars for the listed car. The data contains 14 columns and 381, 346 rows after cleaning it up. We had to clean up the data because there were some rows that lacked all data other then "price", we also removed all vehicles that had zero miles. With that we found some discrepancies in the prices because there was a toyota tundra and other normal cars listed in the billions. To deal with that we will be using the cars between $500 and $1 million. Our response is price in dollars. We paln to measure the following predictors; year, manufacturer, condition, cylinders, fuel, miles, title status, transmission, drive, type, state, and paint color. The data was collected via scraping Craigslist. THe data contains the response variable we want along with a number of meaningful predictors that makes it suitable for this project. Along with that there are  many observations which is good for this project. The Kaggle dataset is marked CC0 1.0 which allows people to copy, modify, and share the data without copyright permisison.
 
 ## What the baseline shows
 
-**Describe and justify a simple course-based baseline regression model. Interpret the result that best establishes the rest of the story, including its direction, magnitude, scale, and uncertainty. Explain one limitation or unresolved pattern that motivates deeper analysis.**
+Holding all other predictors constant, increasing the year of a used car by 1 is associated with an increase of $372, on average. From the plot, there is a slight decline between price and mileage as the mileage increases. That trend seems to be more visibly present in the excellent, good, like new, and new plots.
 
 ```{r}
-# Load packages and data, document preparation, and fit the baseline.
+library(tidyverse)
+library(readxl)
+used_cars <- read_excel("Final Project Used Cars STAT 330.xlsx")
+
+#cleaning data to price range of $500 and $1 million 
+used_cars_clean <- used_cars |>
+    filter(
+    !is.na(price),
+    price >= 500,
+    price <= 1000000,
+    !is.na(miles),
+    miles > 0,
+    miles < 2000000
+  )
+
+used_lm <- lm(price ~ year + manufacturer + condition + cylinders + fuel + miles + title_status + transmission + drive + type + paint_color + state, 
+   data = used_cars_clean)
+
+summary(used_lm)
 ```
 
 ```{r}
-# Show a primary figure or table only if it helps answer the question.
+used_cars_clean |>
+  ggplot(aes(x = miles, y = price)) +
+  geom_point(alpha = 0.08, size = 0.5) +
+  facet_wrap(~ condition) +
+  scale_x_log10(labels = scales::label_comma()) +
+  scale_y_log10(labels = scales::label_dollar()) +
+  labs(
+    title = "Used car asking prices by mileage and condition",
+    x = "Miles (log scale)",
+    y = "Asking price (log scale)"
+  )
 ```
 
 ## Going beyond the baseline
